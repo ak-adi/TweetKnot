@@ -3,26 +3,16 @@ package com.example.tweetknot
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.tweetknot.api.TweetAPI
 import com.example.tweetknot.screens.CategoryScreen
 import com.example.tweetknot.screens.DetailScreen
-import com.example.tweetknot.ui.theme.TweetKnotTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -40,19 +30,24 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "category" ){
-        composable(route = "category"){
-            CategoryScreen{
+    NavHost(navController = navController, startDestination = "category") {
+        composable(route = "category") {
+            CategoryScreen {
                 navController.navigate("detail/${it}")
             }
         }
 
         composable(route = "detail/{category}", arguments = listOf(
-            navArgument("category"){
+            navArgument("category") {
                 type = NavType.StringType
             }
-        )){
-            DetailScreen()
+        )) {
+            val categoryName = it.arguments!!.getString("category")
+            categoryName?.let { name ->
+                DetailScreen(category = name, onBackPressed = {
+                    navController.navigateUp()
+                })
+            }
         }
     }
 }
